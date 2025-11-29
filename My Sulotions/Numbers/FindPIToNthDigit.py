@@ -1,6 +1,11 @@
 from math import factorial, sqrt
 from decimal import Decimal, getcontext
 
+'''
+Find PI to the Nth Digit - Enter a number and have the program generate PI up to that many decimal places. Keep a limit to how far the program will go.
+'''
+
+
 getcontext().prec=500
 
 n = int(input("ENTER: "))
