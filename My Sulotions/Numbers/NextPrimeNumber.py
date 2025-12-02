@@ -10,17 +10,17 @@ print("The first prime nubmer is 2")
 c = ''
 
 while 1:
-    doo = True
+    isprime = True
     if c == 'y' or c == '':
         for i in primes:
             if start % i == 0:
                 start += 2
-                doo = False
+                isprime = False
                 break
-        if doo:
+        if isprime:
             print("Next is " + str(start))
             primes.append(start)
-            c = input("Do you want to continue?(Y/n): ")
+            c = input("Do you want to continue? (Y/n): ").strip().lower()
             start += 2
             
     else:
