@@ -197,7 +197,6 @@ Threading
 [[SumedhArani(python)]](https://github.com/SumedhArani/Threading-Python)
 [[tushar-rishav(python)]](https://github.com/tushar-rishav/Pynail)
 Web
----------
 
 **Page Scraper** - Create an application which connects to a site and pulls out all links, or images, and saves them to a list. *Optional: Organize the indexed content and don’t allow duplicates. Have it put the results into an easily searchable index file.* [[mouradmourafiq (python)]](https://github.com/mouradmourafiq/pages-jaunes-maroc)[[chillaranand (python)]](https://github.com/ChillarAnand/site_crawler) [[tapasweni-pathak (python)]](https://github.com/tapasweni-pathak/STW-Collection) [[brahalla (python)]](https://github.com/brahalla/Scripts/blob/master/web/scrape_links.py)
 
