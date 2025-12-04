@@ -26,8 +26,9 @@ class NumberPad(Static):
             yield Button("1")
             yield Button("+")
             yield Button("-")
+            yield Button("0")
             yield Button(".")
-            yield Button("0", classes="spantwo")
+            yield Button("+/-")
             yield Button("=", classes="spantwo")
 
             
@@ -40,8 +41,9 @@ class calculator(App):
     def compose(self) -> ComposeResult:
         yield Header(show_clock=True)
         yield Footer()
-        # yield TextArea()
-        yield NumberPad()
+        with Container(id="calculator"):
+            yield TextArea(id="screen")
+            yield NumberPad()
         
     def action_toggle_dark(self) -> None:
         """An action to toggle dark mode."""
