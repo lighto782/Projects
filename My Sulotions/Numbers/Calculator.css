@@ -4,6 +4,7 @@
     max-width: 47;
     min-width: 40;
     background: $boost;
+    border: #262626 thick;
     padding-top: 1;
     box-sizing: content-box;
     align: center middle;
@@ -43,4 +44,8 @@ Button {
     column-span: 2;
     max-width: 18;
     width: 100%;
+}
+
+#equation {
+    content-align: right bottom;
 }
