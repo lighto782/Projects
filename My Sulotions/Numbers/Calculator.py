@@ -5,7 +5,7 @@
 from decimal import Decimal
 
 from textual import events, on
-from textual.reactive import reactive, var
+from textual.reactive import var
 from textual.app import App, ComposeResult
 from textual.containers import Container, VerticalGroup
 from textual.widgets import Footer, Header, Static, Button, Digits
@@ -15,14 +15,16 @@ class NumberPad(Static):
     
     def compose(self) -> ComposeResult:
         with Container(id="numpad"):
-            yield Button("pass", classes="span-three")
-            yield Button("C", id="reset", variant="error")
-            yield Button("⌫", id="backspace", variant="error")
+            yield Button("ANS", id="answer", variant="success")
+            yield Button("PWR", id="power", variant="warning", classes="operator")
+            yield Button("MOD", id="percent", variant="warning", classes="operator")
+            yield Button("CLR", id="reset", variant="error")
+            yield Button("DEL", id="backspace", variant="error")
             yield Button("9", id="n9", classes="number")
             yield Button("8", id="n8", classes="number")
             yield Button("7", id="n7", classes="number")
-            yield Button("(", id="lbracket", variant="warning")
-            yield Button(")", id="rbracket", variant="warning")
+            yield Button("(", id="lbracket", variant="warning", classes="bracket")
+            yield Button(")", id="rbracket", variant="warning", classes="bracket")
             yield Button("6", id="n6", classes="number")
             yield Button("5", id="n5", classes="number")
             yield Button("4", id="n4", classes="number")
@@ -33,10 +35,9 @@ class NumberPad(Static):
             yield Button("1", id="n1", classes="number")
             yield Button("+", id="add", variant="warning", classes="operator")
             yield Button("-", id="sub", variant="warning", classes="operator")
-            yield Button("0", id="n0", classes="number")
+            yield Button("0", id="n0", classes="number span-two")
             yield Button(".", id="point", variant="primary", classes="operator")
-            yield Button("+/-", id="negative", variant="primary")
-            yield Button("=", id="equal",  classes="spantwo", variant="success")
+            yield Button("=", id="equal",  classes="span-two", variant="success")
 
 
 class Display(Static):
@@ -58,7 +59,11 @@ class calculator(App):
         "divide" : "/",
         "add" : "+",
         "sub" : "-",
-        "point" : "."
+        "percent" : "%",
+        "power" : "**",
+        "point" : ".",
+        "lbracket" : "(",
+        "rbracket" : ")"
     }
     
     numbers = var("0")
@@ -88,34 +93,42 @@ class calculator(App):
         assert event.button.id is not None
         operator = self.OPERATORS[event.button.id]
         equation = self.query_one("#equation", Static)
-        assert equation.content[-1] not in '/*+-.'
-        equation.update(equation.content + str(operator))
+        if equation.content[-1] not in '/*+-.%':
+            equation.update(equation.content + str(operator))
+    
+    @on(Button.Pressed, ".bracket")
+    def bracket_pressed(self, event: Button.Pressed) -> None:
+        """Pressed a bracket."""
+        assert event.button.id is not None
+        bracket = self.OPERATORS[event.button.id]
+        equation = self.query_one("#equation", Static)
+        equation.update(equation.content + str(bracket))
         
     @on(Button.Pressed, "#equal")
-    def solve(self, event: Button.Pressed) -> None:
+    def solve(self) -> None:
         """Gettin the result using eval()"""
-        assert event.button.id is not None
         res = self.query_one("#result", Digits)
+        equation = self.query_one("#equation", Static)
         try:
-            res.update(str(eval(self.query_one("#equation").content)))
+            res.update(str(Decimal(eval(equation.content))))
         except ZeroDivisionError:
-            res.update("E0")
+            res.update("E2")
         except SyntaxError:
             res.update("E1")
+        except:
+            res.update("E0")
         
     @on(Button.Pressed, "#reset")
-    def reset(self, event: Button.Pressed) -> None:
+    def reset(self) -> None:
         """Restting equation and result"""
-        assert event.button.id is not None
         equation = self.query_one("#equation", Static)
         res = self.query_one("#result", Digits)
         equation.update('0')
         res.update('0')
         
     @on(Button.Pressed, "#backspace")
-    def point_pressed(self, event: Button.Pressed) -> None:
+    def point_pressed(self) -> None:
         """Delete last inserted digit"""
-        assert event.button.id is not None
         equation = self.query_one("#equation", Static)
         if equation.content == "0":
             pass
@@ -123,10 +136,15 @@ class calculator(App):
             equation.update('0')    
         else:
             equation.update(equation.content[:-1])
-        
     
+    @on(Button.Pressed, "#answer")
+    def retrive_answer(self) -> None:
+        """Get the final answer and put in the equation"""
+        equation = self.query_one("#equation", Static)
+        res = self.query_one("#result", Digits)
+        equation.update(res.value)
+        res.update("0")
         
-
 
 if __name__ == "__main__":
     app = calculator()

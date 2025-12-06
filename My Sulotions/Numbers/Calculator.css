@@ -40,7 +40,7 @@ Button {
     min-width: 8;
 }
 
-.spantwo {
+.span-two {
     column-span: 2;
     max-width: 18;
     width: 100%;
