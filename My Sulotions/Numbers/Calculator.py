@@ -82,10 +82,10 @@ class calculator(App):
         assert event.button.id is not None
         number = event.button.id[-1]
         equation = self.query_one("#equation", Static)
-        if equation.content[-1] != '0':
-            equation.update(equation.content + number)
-        else:
+        if equation.content[-1] == '0' and len(equation.content) == 1:
             equation.update(equation.content.lstrip('0') + number)
+        else:
+            equation.update(equation.content + number)
     
     @on(Button.Pressed, ".operator")
     def operator_pressed(self, event: Button.Pressed) -> None:
@@ -93,7 +93,7 @@ class calculator(App):
         assert event.button.id is not None
         operator = self.OPERATORS[event.button.id]
         equation = self.query_one("#equation", Static)
-        if equation.content[-1] not in '/*+-.%':
+        if equation.content[-1] not in '/*+-.%(':
             equation.update(equation.content + str(operator))
     
     @on(Button.Pressed, ".bracket")
@@ -102,10 +102,15 @@ class calculator(App):
         assert event.button.id is not None
         bracket = self.OPERATORS[event.button.id]
         equation = self.query_one("#equation", Static)
-        equation.update(equation.content + str(bracket))
+        if bracket == '(' and equation.content[-1] in '0123456789':
+            equation.update(equation.content + "*" + str(bracket))
+        elif bracket == ')' and equation.content[-1] in '+-*/.(':
+            return
+        else:
+            equation.update(equation.content + str(bracket))
         
     @on(Button.Pressed, "#equal")
-    def solve(self) -> None:
+    def solve_pressed(self) -> None:
         """Gettin the result using eval()"""
         res = self.query_one("#result", Digits)
         equation = self.query_one("#equation", Static)
@@ -119,7 +124,7 @@ class calculator(App):
             res.update("E0")
         
     @on(Button.Pressed, "#reset")
-    def reset(self) -> None:
+    def reset_pressed(self) -> None:
         """Restting equation and result"""
         equation = self.query_one("#equation", Static)
         res = self.query_one("#result", Digits)
@@ -138,7 +143,7 @@ class calculator(App):
             equation.update(equation.content[:-1])
     
     @on(Button.Pressed, "#answer")
-    def retrive_answer(self) -> None:
+    def answer_pressed(self) -> None:
         """Get the final answer and put in the equation"""
         equation = self.query_one("#equation", Static)
         res = self.query_one("#result", Digits)
@@ -150,3 +155,12 @@ if __name__ == "__main__":
     app = calculator()
     app.run()
 # end main
+
+
+"""
+Things to add in the future:
+- a parser instead of using eval()
+- scintific mode
+- allowing the use of keyboard keys to interact with the calculator
+- pollishing the code
+"""
