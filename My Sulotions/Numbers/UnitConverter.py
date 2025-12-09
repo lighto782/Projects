@@ -1,14 +1,20 @@
 import curses
 
 class menu():
-    def __init__(self, win, menu: list, selected: int):
+    def __init__(self, win, menu: list, selected: int, title:str):
         self.win = win
         self.menu = menu
         self.selected = selected
+        self.title = title
+    
+    def draw_title(self) -> None:
+        height, width = self.win.getmaxyx()
+        self.win.addstr(0,int((width // 2) - (len(self.title) // 2) - len(self.title) % 2), self.title,curses.A_BOLD)
 
     def draw_menu(self, focused:bool) -> None:
         self.win.erase()
         self.win.box()
+        self.draw_title()
         for i, item in enumerate(self.menu):
                 if i == self.selected and focused:
                     self.win.addstr(i+1, 2, f"> {item}", curses.A_REVERSE | curses.A_ITALIC)
@@ -21,35 +27,49 @@ class menu():
             self.selected -= 1
         elif key == curses.KEY_DOWN and self.selected < len(self.menu) - 1:
             self.selected += 1
-        
+    
 
 
 def main(stdscr):
+    def draw_title(win, title, dim) -> None:
+        height, width = dim
+        win.box()
+        win.addstr(0,int((width // 2) - (len(title) // 2) - len(title) % 2),title,curses.A_BOLD)
+    
+        
     curses.curs_set(0)
     stdscr.erase()
     stdscr.box()
-    stdscr.addstr(1,10,"Unit Converter",curses.A_BOLD)
-    stdscr.addstr(2, 3, "Choose which units you want to convert:")
-    menu_items = ["Tempreture (C°, F°, K°)", "Weight (Kg, G, Lb, Ton, Oz, ....)", "Length (M, Km, Ft, Mile, Inch, .....)", "Exit"]
+    titles = ["Unit Converter", "Type", "From", "To"]
+    hint = "Choose which units you want to convert"
+    
+    menu_items = ["Tempreture (C°, F°, K°)", "Weight (Kg, G, Lb, Ton, Oz, ....)", "Length (M, Km, Ft, Mile, Inch, .....)"]
+    
     Units = [
     ["Celsius", "Fahrenheit", "Kelvin"],
     ["Kilogram", "Gram", "Milligram", "Metric ton", "Pound", "Ounce", "Carat"],
     ["Kilometer", "Meter", "Centimeter", "Millemeter", "Mile", "Yard", "Foot", "Inch"],
-    []
     ]
     
     UNIT, FROM, TO, INPUT = range(4)
     
+    height, width = stdscr.getmaxyx()    
+
+    # stdscr.addstr(0,int((width // 2) - (len(title) // 2) - len(title) % 2),title,curses.A_BOLD)
+    draw_title(stdscr, titles[0], stdscr.getmaxyx())
+    stdscr.addstr(2, int((width // 2) - (len(hint) // 2) - len(hint) % 2), hint)
+    
+    
     current_window = 0
     
-    Units_win = menu(curses.newwin(len(Units) + 2, 50, 3, 1), menu_items, 0)
-    From_Unit_win = menu(curses.newwin(10, 15, 11, 5) , Units[0], 0)
-    To_Unit_win = menu(curses.newwin(10, 15, 11, 21), Units[0], 0)
+    Units_win = menu(curses.newwin(len(menu_items) + 2, 48, 3, int((width // 2) - 24)), menu_items, 0,titles[1])
+    From_Unit_win = menu(curses.newwin(10, 22, len(menu_items) + 5, (width // 2) - 24) , Units[0], 0,titles[2])
+    To_Unit_win = menu(curses.newwin(10, 22, len(menu_items) + 5, (width // 2) + 2), Units[0], 0, titles[3])    
     
-    Input_Field_win = curses.newwin(3, 15, 25, 5)
-    Input_Field_win.box()
-    Output_Field_win = curses.newwin(3, 15, 25, 21)
-    Output_Field_win.box()
+    Input_Field_win = curses.newwin(3, 22, len(menu_items) + 15, (width // 2) - 24)
+    draw_title(Input_Field_win, titles[2], Input_Field_win.getmaxyx())
+    Output_Field_win = curses.newwin(3, 22, len(menu_items) + 15, (width // 2) + 2)
+    draw_title(Output_Field_win, titles[3], Output_Field_win.getmaxyx())
     
     stdscr.refresh()
     
@@ -58,6 +78,32 @@ def main(stdscr):
     Output_Field_win.refresh()
     
     while True:
+        if (height, width) != stdscr.getmaxyx():
+            height, width = stdscr.getmaxyx()
+            #recentering main title
+            stdscr.erase()
+            draw_title(stdscr, titles[0], stdscr.getmaxyx())
+            stdscr.addstr(2, int((width // 2) - (len(hint) // 2) - len(hint) % 2), hint)
+            
+            # recentering menus
+            Units_win.win.mvwin(3,int((width // 2) - 24))
+            From_Unit_win.win.mvwin(len(menu_items) + 5, (width // 2) - 24)
+            To_Unit_win.win.mvwin(len(menu_items) + 5, (width // 2) + 2)
+            
+            #recentering text fields
+            Input_Field_win.mvwin(len(menu_items) + 15, (width // 2) - 24)
+            draw_title(Input_Field_win, titles[2], Input_Field_win.getmaxyx())
+            
+            Output_Field_win.mvwin(len(menu_items) + 15, (width // 2) + 2)
+            draw_title(Output_Field_win, titles[3], Output_Field_win.getmaxyx())
+            
+            
+            stdscr.refresh()
+            
+            Input_Field_win.refresh()
+            Output_Field_win.refresh()
+            
+        
         
         From_Unit_win.menu = Units[Units_win.selected]
         To_Unit_win.menu = Units[Units_win.selected]
@@ -92,6 +138,8 @@ def main(stdscr):
                     user_input += chr(ch)
                     Input_Field_win.addstr(1,1, user_input)
                     Input_Field_win.refresh()
+                elif ch == ord('q'):
+                    break
 
             curses.curs_set(0)
             
@@ -108,10 +156,7 @@ def main(stdscr):
             To_Unit_win.handle_key(key)
         
         if key == ord('\n'):
-            if Units_win.selected == len(menu_items) - 1 and current_window == UNIT:
-                break
-            else:
-                current_window += 1
+            current_window += 1
         elif key == 9:
             current_window += 1
         elif key == ord('q'):
