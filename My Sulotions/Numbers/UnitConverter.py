@@ -1,5 +1,53 @@
 import curses
 
+
+def Converter(n: float, Utype, From_Unit, To_Unit) -> float:
+    Unit_type = {
+        0: [
+            #meta unit is celsius
+            #transforming to celsius
+            {
+                0: lambda n: n,
+                1: lambda n: ((n - 32) * 5) / 9,
+                2: lambda n: n - 273.15,
+            },
+            #transforming from celsius
+            {
+                0: n,
+                1: lambda n: ((9 * n) / 5) + 32,
+                2: lambda n: n + 273.15,
+            }
+        ],
+        
+        1: [
+            #meta unit is gram
+            #transforming to gram
+            {
+                0: lambda n: n * 1000,
+                1: lambda n: n,
+                2: lambda n: n / 1000,
+                3: lambda n: n * 1000000,
+                4: lambda n: n * 453.59237,
+                5: lambda n: n * 28.34952,
+                6: lambda n: n / 5
+            },
+            #transforming from gram
+            {
+                0: lambda n: n / 1000,
+                1: lambda n: n,
+                2: lambda n: n * 1000,
+                3: lambda n: n / 1000000,
+                4: lambda n: n / 453.59237,
+                5: lambda n: n / 28.34952,
+                6: lambda n: n * 5
+            }
+        ]
+    }
+    
+    return Unit_type[Utype][1][To_Unit](Unit_type[Utype][0][From_Unit](n))
+    
+# def Length(n: float)
+    
 class menu():
     def __init__(self, win, menu: list, selected: int, title:str):
         self.win = win
@@ -39,7 +87,6 @@ def main(stdscr):
         
     curses.curs_set(0)
     stdscr.erase()
-    stdscr.box()
     titles = ["Unit Converter", "Type", "From", "To"]
     hint = "Choose which units you want to convert"
     
@@ -55,7 +102,6 @@ def main(stdscr):
     
     height, width = stdscr.getmaxyx()    
 
-    # stdscr.addstr(0,int((width // 2) - (len(title) // 2) - len(title) % 2),title,curses.A_BOLD)
     draw_title(stdscr, titles[0], stdscr.getmaxyx())
     stdscr.addstr(2, int((width // 2) - (len(hint) // 2) - len(hint) % 2), hint)
     
@@ -140,10 +186,15 @@ def main(stdscr):
                     Input_Field_win.refresh()
                 elif ch == ord('q'):
                     break
+            
+            output = Converter(float(user_input), Units_win.selected, From_Unit_win.selected, To_Unit_win.selected)
 
+            Output_Field_win.addstr(1,1,str(output))
+            Output_Field_win.refresh()
+            
             curses.curs_set(0)
             
-            current_window = 0
+            current_window = (current_window + 1) % 4
             continue
         
         key = stdscr.getch()
@@ -156,9 +207,9 @@ def main(stdscr):
             To_Unit_win.handle_key(key)
         
         if key == ord('\n'):
-            current_window += 1
+            current_window = (current_window + 1) % 4
         elif key == 9:
-            current_window += 1
+            current_window = (current_window + 1) % 4
         elif key == ord('q'):
             break
         stdscr.refresh()
