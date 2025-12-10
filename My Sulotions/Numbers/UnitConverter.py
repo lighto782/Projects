@@ -3,6 +3,7 @@ import curses
 
 def Converter(n: float, Utype, From_Unit, To_Unit) -> float:
     Unit_type = {
+        #Tempreture
         0: [
             #meta unit is celsius
             #transforming to celsius
@@ -18,7 +19,7 @@ def Converter(n: float, Utype, From_Unit, To_Unit) -> float:
                 2: lambda n: n + 273.15,
             }
         ],
-        
+        #Weight
         1: [
             #meta unit is gram
             #transforming to gram
@@ -41,6 +42,32 @@ def Converter(n: float, Utype, From_Unit, To_Unit) -> float:
                 5: lambda n: n / 28.34952,
                 6: lambda n: n * 5
             }
+        ],
+        #Length
+        2: [
+            #meta unit is meter
+            #transforming to meter
+            {
+                0: lambda n: n * 1000,
+                1: lambda n: n,
+                2: lambda n: n / 100,
+                3: lambda n: n / 1000,
+                4: lambda n: n * 1609.344,
+                5: lambda n: n * 0.9144,
+                6: lambda n: n * 0.3048,
+                7: lambda n: n * 0.0254 
+            },
+            #transforming from meter
+            {
+                0: lambda n: n / 1000,
+                1: lambda n: n,
+                2: lambda n: n * 100,
+                3: lambda n: n * 1000,
+                4: lambda n: n / 1609.344,
+                5: lambda n: n / 0.9144,
+                6: lambda n: n / 0.3048,
+                7: lambda n: n / 0.0254 
+            },
         ]
     }
     
